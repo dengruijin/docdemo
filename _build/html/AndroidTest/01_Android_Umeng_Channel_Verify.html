@@ -1,0 +1,293 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>1. 验证Android渠道版本渠道号 &mdash; Test-Cookbook</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+
+  
+    <link rel="top" title="Test-Cookbook" href="../index.html"/>
+        <link rel="up" title="第二章: Android 测试" href="index.html"/>
+        <link rel="next" title="2. 1. Apk签名校验" href="02_signature_verification.html"/>
+        <link rel="prev" title="第二章: Android 测试" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Test-Cookbook
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                v1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../foreword.html">前言</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../TestingPractice/index.html">第一章: 测试实践</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">第二章: Android 测试</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">1. 验证Android渠道版本渠道号</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">问题</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">怎么做</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#a-android-apk">a. 反编译Android Apk</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#b">b. 获取渠道号</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="02_signature_verification.html">2. 1. Apk签名校验</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Test-Cookbook</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">第二章: Android 测试</a> &raquo;</li>
+      
+    <li>1. 验证Android渠道版本渠道号</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/AndroidTest/01_Android_Umeng_Channel_Verify.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="android">
+<h1>1. 验证Android渠道版本渠道号<a class="headerlink" href="#android" title="永久链接至标题">¶</a></h1>
+<p>国内市场上有许许多多的应用市场，常见的有：百度、360、腾讯应用宝、豌豆荚等。
+其他手机厂家如小米、华为、魅族、三星等都有自己的应用市场，总共有上百家！</p>
+<hr class="docutils" />
+<div class="section" id="id1">
+<h2>问题<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>发版前，Android工程师打包了上百个渠道版本，如何检验渠道号与apk名称是否一致？</p>
+<p>希望自动去获取apk的友盟渠道号，并自动进行校验。</p>
+</div>
+<div class="section" id="id2">
+<h2>怎么做<a class="headerlink" href="#id2" title="永久链接至标题">¶</a></h2>
+<p>Android Apk的渠道号一般存放在AndroidManifest.xml文件中。</p>
+<ol class="arabic simple">
+<li>批量反编译Android Apk</li>
+<li>遍历反编译后的apk文件夹，从AndroidManifest.xml取出渠道号</li>
+<li>比较渠道号与apk名称</li>
+<li>将测试结果写入csv文件</li>
+</ol>
+<div class="section" id="a-android-apk">
+<h3>a. 反编译Android Apk<a class="headerlink" href="#a-android-apk" title="永久链接至标题">¶</a></h3>
+<hr class="docutils" />
+<p>反编译Apk,得到源文件和资源文件.</p>
+<p>渠道号存放在 <strong>AndroidManifest.xml</strong> 文件中。</p>
+<p>反编译工具apktool.jar: <a class="reference external" href="https://bitbucket.org/iBotPeaches/apktool/downloads">https://bitbucket.org/iBotPeaches/apktool/downloads</a></p>
+<div class="highlight-java"><div class="highlight"><pre><span></span><span class="n">java</span> <span class="o">-</span><span class="n">jar</span> <span class="n">apktool</span><span class="o">.</span><span class="na">jar</span> <span class="n">d</span> <span class="o">-</span><span class="n">f</span> <span class="n">package</span><span class="o">.</span><span class="na">apk</span>
+</pre></div>
+</div>
+<p>输出结果如下：</p>
+<div class="highlight-java"><div class="highlight"><pre><span></span>I: Using Apktool 2.1.0 on test.apk
+I: Loading resource table...
+I: Decoding AndroidManifest.xml with resources...
+I: Loading resource table from file: C:\Users\Administrator\apktool\framework\1.apk
+I: Regular manifest package...
+I: Decoding file-resources...
+I: Decoding values */* XMLs...
+I: Baksmaling classes.dex...
+I: Copying assets and libs...
+I: Copying unknown files...
+I: Copying original files...
+</pre></div>
+</div>
+<p><strong>备注:</strong>
+Android apk整体反编译所需时间较长，如只获取AndroidManifest.xml文件，那么只需反编译
+资源文件即可，不对源代码进行反编译，使用参数 <strong>-s</strong> ,只需花费很少时间.</p>
+</div>
+<div class="section" id="b">
+<h3>b. 获取渠道号<a class="headerlink" href="#b" title="永久链接至标题">¶</a></h3>
+<hr class="docutils" />
+<p>遍历AndroidManifest.xml文件，取出渠道号所在行.</p>
+<p>python实现如下：</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span><span class="s1">&#39;r+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+    <span class="n">umeng_line</span> <span class="o">=</span> <span class="p">[</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;UMENG_CHANNEL&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">]</span>
+<span class="c1">#取出渠道号所在行后，进行分割、去除.</span>
+</pre></div>
+</div>
+<p>或者直接输入编译后的apk文件夹，具体如下：</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">get_apk_umeng_value</span><span class="p">(</span><span class="n">reverse_folder</span><span class="p">):</span>
+    <span class="n">umeng_channel</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">rfn</span> <span class="ow">in</span> <span class="n">reverse_folder</span><span class="p">:</span>
+        <span class="n">manifest</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">version_catalogue</span><span class="p">,</span><span class="n">rfn</span><span class="p">,</span><span class="s1">&#39;AndroidManifest.xml&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span><span class="s1">&#39;r+&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">umeng_line</span> <span class="o">=</span> <span class="p">[</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span> <span class="k">if</span> <span class="s1">&#39;UMENG_CHANNEL&#39;</span> <span class="ow">in</span> <span class="n">line</span> <span class="p">]</span>
+                <span class="k">for</span> <span class="n">ul</span> <span class="ow">in</span> <span class="n">umeng_line</span><span class="p">:</span>
+                    <span class="n">ucv</span> <span class="o">=</span> <span class="n">ul</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="c1">#使用strip过滤&quot;/&gt;//--等特殊字符</span>
+                    <span class="n">umeng_channel</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ucv</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;/&gt;// --&#39;</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">umeng_channel</span>
+</pre></div>
+</div>
+<p><strong>完整代码地址：</strong></p>
+<blockquote>
+<div><a class="reference external" href="https://github.com/midada/Android-Test/blob/master/channelverify.py">https://github.com/midada/Android-Test/blob/master/channelverify.py</a></div></blockquote>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="02_signature_verification.html" class="btn btn-neutral float-right" title="2. 1. Apk签名校验" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral" title="第二章: Android 测试" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; 版权所有 2016, midada.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'v1.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="../_static/translations.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+
+
+======================
+第二章: Android 测试
+======================
+
+测试，打造完美移动应用的关键。
+
+**Android发版前测试注意事项**
+
+    #. 验证Android渠道版本版本号
+    #. Android每个渠道版本冒烟测试
+    #. Android签名检查
+
+.. toctree::
+   :maxdepth: 1
+   :numbered: 1
+
+   01_Android_Umeng_Channel_Verify
+   02_signature_verification
+

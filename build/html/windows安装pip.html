@@ -1,0 +1,134 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Windows下安装pip &mdash; demo 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="top" title="demo 0.0.1 文档" href="index.html" />
+    <link rel="prev" title="VDSM源码分析" href="vdsm源码分析.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="windowspip">
+<h1>Windows下安装pip<a class="headerlink" href="#windowspip" title="永久链接至标题">¶</a></h1>
+<div class="section" id="pythton">
+<h2>安装pythton<a class="headerlink" href="#pythton" title="永久链接至标题">¶</a></h2>
+<ol class="arabic simple">
+<li>从python官网下载python的windows版安装包，这里用现有的python-2.7.3</li>
+<li>配置环境变量</li>
+</ol>
+<blockquote>
+<div>鼠标右键点击 <strong>我的电脑</strong> &#8211;&gt; <strong>属性</strong> &#8211;&gt; <strong>高级系统设置</strong>&#8211;&gt; <strong>环境变量</strong>。
+在系统环境变量中选择 <a href="#id1"><span class="problematic" id="id2">**</span></a>Path**进行编辑，在最后面加上 <em>;C:Python27</em>。</div></blockquote>
+</div>
+<div class="section" id="setuptools">
+<h2>安装setuptools<a class="headerlink" href="#setuptools" title="永久链接至标题">¶</a></h2>
+<p>下载https://bootstrap.pypa.io/ez_setup.py ,
+下载完后双击 <em>ez_setup.py</em> 运行即可。</p>
+</div>
+<div class="section" id="pip">
+<h2>安装pip<a class="headerlink" href="#pip" title="永久链接至标题">¶</a></h2>
+<ol class="arabic simple">
+<li>下载pip源码包并解压： 网址：<a class="reference external" href="https://pypi.python.org/pypi/pip#downloads">https://pypi.python.org/pypi/pip#downloads</a></li>
+<li>在pip源码包解压后的目录中打开CMD，执行 <strong>*python setup.py install*</strong></li>
+<li>配置环境变量</li>
+</ol>
+<blockquote>
+<div>鼠标右键点击 <strong>我的电脑</strong> &#8211;&gt; <strong>属性</strong> &#8211;&gt; <strong>高级系统设置</strong>&#8211;&gt; <strong>环境变量</strong>。
+在系统环境变量中选择 <a href="#id3"><span class="problematic" id="id4">**</span></a>Path**进行编辑，在最后面加上 <em>;C:Python27Scripts</em>。</div></blockquote>
+<p>pip install virtualenv</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Windows下安装pip</a><ul>
+<li><a class="reference internal" href="#pythton">安装pythton</a></li>
+<li><a class="reference internal" href="#setuptools">安装setuptools</a></li>
+<li><a class="reference internal" href="#pip">安装pip</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="vdsm源码分析.html" title="上一章">VDSM源码分析</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/windows安装pip.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="转向" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, dengrj.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/windows安装pip.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

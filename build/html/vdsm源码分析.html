@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh_CN">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>VDSM源码分析 &mdash; demo 0.0.1 文档</title>
+    
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <link rel="top" title="demo 0.0.1 文档" href="index.html" />
+    <link rel="next" title="Windows下安装pip" href="windows安装pip.html" />
+    <link rel="prev" title="Welcome to demo’s documentation!" href="index.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="vdsm">
+<h1>VDSM源码分析<a class="headerlink" href="#vdsm" title="永久链接至标题">¶</a></h1>
+<div class="section" id="id1">
+<h2>启动分析<a class="headerlink" href="#id1" title="永久链接至标题">¶</a></h2>
+<p>vdsm的启动文件是/usr/share/vdsm/vdsm，即vdsm-ovirt-3.5/vdsm/vdsm
+该文件中首先调用run()函数，一切从此开始：</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+  <span class="n">__assertVdsmUser</span><span class="p">()</span>
+  <span class="n">__assertLogPermission</span><span class="p">()</span>
+  <span class="n">__assertSudoerPermissions</span><span class="p">()</span>
+
+  <span class="k">if</span> <span class="ow">not</span> <span class="n">config</span><span class="o">.</span><span class="n">getboolean</span><span class="p">(</span><span class="s1">&#39;vars&#39;</span><span class="p">,</span> <span class="s1">&#39;core_dump_enable&#39;</span><span class="p">):</span>
+      <span class="n">resource</span><span class="o">.</span><span class="n">setrlimit</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RLIMIT_CORE</span><span class="p">,</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+  <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">getsid</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">():</span>
+      <span class="c1"># Modern init systems such as systemd can provide us a clean daemon</span>
+      <span class="c1"># environment. So we setpgrp only when run by traditional init system</span>
+      <span class="c1"># that does not prepare the environment.</span>
+      <span class="n">os</span><span class="o">.</span><span class="n">setpgrp</span><span class="p">()</span>
+  <span class="n">argDict</span> <span class="o">=</span> <span class="n">parse_args</span><span class="p">()</span>
+  <span class="n">run</span><span class="p">(</span><span class="o">**</span><span class="n">argDict</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>run函数的关键调用流程如下：</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">run</span><span class="p">()</span>
+  <span class="o">|-</span><span class="n">serve_clients</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+  <span class="o">|-</span><span class="n">cif</span> <span class="o">=</span> <span class="n">clientIF</span><span class="o">.</span><span class="n">getInstance</span><span class="p">(</span><span class="n">irs</span><span class="p">,</span> <span class="n">log</span><span class="p">)</span>
+  <span class="o">|</span>                   <span class="o">|-</span><span class="n">cls</span><span class="o">.</span><span class="n">_instance</span> <span class="o">=</span> <span class="n">clientIF</span><span class="p">(</span><span class="n">irs</span><span class="p">,</span> <span class="n">log</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">)</span>
+  <span class="o">|</span>                          <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">_createAcceptor</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+  <span class="o">|</span>                          <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">_prepareJSONRPCBinding</span><span class="p">()</span>
+  <span class="o">|</span>                          <span class="o">|-</span><span class="n">json_binding</span> <span class="o">=</span> <span class="n">BindingJsonRpc</span><span class="p">(</span><span class="o">...</span><span class="p">)</span>
+  <span class="o">|</span>                          <span class="o">|</span>    <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">Executor</span><span class="p">()</span>
+  <span class="o">|</span>                          <span class="o">|</span>    <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">JsonRpcServer</span><span class="p">(</span><span class="n">bridge</span><span class="p">,</span> <span class="n">cif</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">dispatch</span><span class="p">)</span>
+  <span class="o">|</span>                          <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">bindings</span><span class="p">[</span><span class="s1">&#39;jsonrpc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">json_binding</span>
+  <span class="o">|</span>                          <span class="o">|-</span><span class="n">stomp_detector</span> <span class="o">=</span> <span class="n">StompDetector</span><span class="p">(</span><span class="n">json_binding</span><span class="p">)</span>
+  <span class="o">|</span>                          <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">_acceptor</span><span class="o">.</span><span class="n">add_detector</span><span class="p">(</span><span class="n">stomp_detector</span><span class="p">)</span>
+  <span class="o">|-</span><span class="n">cif</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+      <span class="o">|-</span><span class="n">binding</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+      <span class="o">|</span>   <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+      <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_acceptor</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">,</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Detector thread&#39;</span><span class="p">)</span>
+      <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+      <span class="o">|-</span><span class="bp">self</span><span class="o">.</span><span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>其中JsonRpcServer是位于yajsonrpc库中的JsonRpc服务器类，负责RPC服务端的底层实现，
+而vdsm中的BindingJsonRpc是JsonRpc服务的发布者，vdsm守护进程启动时将调用BindingJsonRpc
+的start()方法来启动JsonRpc服务：</p>
+<p>file: vdsm-4.16/vdsm/rpc/BindingJsonRpc.py</p>
+<div class="highlight-Python"><div class="highlight"><pre><span></span><span class="c1"># 实例化BindingJsonRpc</span>
+<span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bridge</span><span class="p">,</span> <span class="n">scheduler</span><span class="p">,</span> <span class="n">cif</span><span class="p">):</span>
+    <span class="c1"># workers_count 是JSONRPC开启的最大线程(worker)数目，默认为8</span>
+    <span class="c1"># max_tasks 是最大支持的task数目，默认每个线程最多支持10个task, 所以max_tasks=80</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">Executor</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;jsonrpc.Executor&quot;</span><span class="p">,</span>
+                                       <span class="n">workers_count</span><span class="o">=</span><span class="n">_THREADS</span><span class="p">,</span>
+                                       <span class="n">max_tasks</span><span class="o">=</span><span class="n">_TASKS</span><span class="p">,</span>
+                                       <span class="n">scheduler</span><span class="o">=</span><span class="n">scheduler</span><span class="p">)</span>
+    <span class="c1"># dispatch是Executor中的一个函数</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_server</span> <span class="o">=</span> <span class="n">JsonRpcServer</span><span class="p">(</span><span class="n">bridge</span><span class="p">,</span> <span class="n">cif</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">dispatch</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_reactors</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># .... other codes .....</span>
+<span class="c1"># ......................</span>
+<span class="c1"># 启动BindingJsonRpc服务</span>
+<span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_executor</span><span class="o">.</span><span class="n">start</span><span class="p">()</span> <span class="c1">#该函数会创建所有线程(worker)</span>
+
+    <span class="c1"># serve_requests是JsonRpcServer中的函数，它不同地从JsonRpcServer的队列中取请求进行处理</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_server</span><span class="o">.</span><span class="n">serve_requests</span><span class="p">,</span>
+                         <span class="n">name</span><span class="o">=</span><span class="s1">&#39;JsonRpcServer&#39;</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">setDaemon</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">t</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>file: vdsm-4.16/lib/yajsonrpc/__init__.py:</p>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">內容目录</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">VDSM源码分析</a><ul>
+<li><a class="reference internal" href="#id1">启动分析</a></li>
+</ul>
+</li>
+</ul>
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="上一章">Welcome to demo&#8217;s documentation!</a></li>
+      <li>Next: <a href="windows安装pip.html" title="下一章">Windows下安装pip</a></li>
+  </ul></li>
+</ul>
+</div>
+  <div role="note" aria-label="source link">
+    <h3>本页</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/vdsm源码分析.txt"
+            rel="nofollow">显示源代码</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>快速搜索</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="转向" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, dengrj.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+      |
+      <a href="_sources/vdsm源码分析.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
